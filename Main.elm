@@ -12,8 +12,8 @@ import Signal exposing (forwardTo)
 import Trigger
 
 
-mailbox : Signal.Mailbox Action
-mailbox =
+messageMailbox : Signal.Mailbox Action
+messageMailbox =
   Signal.mailbox NoOp
 
 
@@ -28,7 +28,7 @@ initialModel =
   { messagesModel = Messages.initialModel
   , triggerModel =
       Trigger.initialModel
-        (forwardTo mailbox.address TriggerValue)
+        (forwardTo messageMailbox.address ShowMessage)
   }
 
 
@@ -74,7 +74,7 @@ update action model =
       in
         ( { model | triggerModel = updated }, Effects.map TriggerAction fx )
 
-    TriggerValue message ->
+    ShowMessage message ->
       let
         ( updated, fx ) =
           Messages.update (MessagesActions.ShowMessage message) model.messagesModel
@@ -87,7 +87,7 @@ app =
   StartApp.start
     { init = init
     , inputs =
-        [ mailbox.signal
+        [ messageMailbox.signal
         ]
     , update = update
     , view = view
