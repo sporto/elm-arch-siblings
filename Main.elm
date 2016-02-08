@@ -76,10 +76,12 @@ update action model =
 
     ShowMessage message ->
       let
-        ( updated, fx ) =
-          Messages.update (MessagesActions.ShowMessage message) model.messagesModel
+        fx =
+          Task.succeed (MessagesActions.ShowMessage message)
+            |> Effects.task
+            |> Effects.map MessagesAction
       in
-        ( { model | messagesModel = updated }, Effects.map MessagesAction fx )
+        ( model, fx )
 
 
 app : StartApp.App Model
