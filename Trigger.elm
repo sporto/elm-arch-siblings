@@ -6,17 +6,17 @@ import Effects exposing (Effects, Never)
 import Task
 import TriggerActions exposing (..)
 
+
 type alias Model =
-  { message : String
-  , valueAddress : Signal.Address String
+  { messageAddress : Signal.Address String
   }
 
 
-init : Signal.Address String -> String -> Model
-init valueAddress message =
-  { message = message
-  , valueAddress = valueAddress
+initialModel : Signal.Address String -> Model
+initialModel messageAddress =
+  { messageAddress = messageAddress
   }
+
 
 
 -- VIEW
@@ -27,7 +27,7 @@ view address model =
   div
     []
     [ button
-        [ onClick address (ShowMessage model.message) ]
+        [ onClick address (ShowMessage "Hello") ]
         [ text "Send message" ]
     ]
 
@@ -41,14 +41,17 @@ update action model =
   case action of
     ShowMessage msg ->
       ( model
-      , sendAsEffect model.valueAddress msg Tasks
+      , sendAsEffect model.messageAddress msg Tasks
       )
 
     Tasks _ ->
-      (model, Effects.none)
+      ( model, Effects.none )
+
 
 
 -- here for now instead of Ext.Signal.sendAsEffect as in elm-ui from @gdotdesign
+
+
 sendAsEffect : Signal.Address a -> a -> (() -> b) -> Effects.Effects b
 sendAsEffect address value action =
   Signal.send address value

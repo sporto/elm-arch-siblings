@@ -25,12 +25,11 @@ type alias Model =
 
 initialModel : Model
 initialModel =
-    { messagesModel = Messages.initialModel
-    , triggerModel =
-        Trigger.init
-          (forwardTo mailbox.address TriggerValue)
-          "Hello"
-    }
+  { messagesModel = Messages.initialModel
+  , triggerModel =
+      Trigger.initialModel
+        (forwardTo mailbox.address TriggerValue)
+  }
 
 
 init : ( Model, Effects Action )
@@ -51,6 +50,7 @@ view address model =
     ]
 
 
+
 -- UPDATE
 
 
@@ -58,7 +58,7 @@ update : Action -> Model -> ( Model, Effects Action )
 update action model =
   case (Debug.log "action" action) of
     NoOp ->
-      (model, Effects.none)
+      ( model, Effects.none )
 
     MessagesAction subAction ->
       let
@@ -87,8 +87,8 @@ app =
   StartApp.start
     { init = init
     , inputs =
-      [ mailbox.signal
-      ]
+        [ mailbox.signal
+        ]
     , update = update
     , view = view
     }
