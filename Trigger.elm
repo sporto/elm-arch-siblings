@@ -27,7 +27,7 @@ view address model =
   div
     []
     [ button
-        [ onClick address (ShowMessage "Hello") ]
+        [ onClick model.messageAddress (MessagesActions.ShowMessage "Hello") ]
         [ text "Send message" ]
     ]
 
@@ -38,15 +38,4 @@ view address model =
 
 update : Action -> Model -> ( Model, Effects Action )
 update action model =
-  case action of
-    ShowMessage msg ->
-      let
-        fx =
-          Signal.send model.messageAddress (MessagesActions.ShowMessage msg)
-            |> Effects.task
-            |> Effects.map ShowMessageDone
-      in
-        ( model, fx )
-
-    ShowMessageDone _ ->
-      ( model, Effects.none )
+  (model, Effects.none)
