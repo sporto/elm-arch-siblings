@@ -7,4 +7,5 @@ import MessagesActions
 type Action
   = MessagesAction MessagesActions.Action
   | TriggerAction TriggerActions.Action
-  | ShowMessage String
+  | TriggerValue String
+  | NoOp
