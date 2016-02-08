@@ -8,18 +8,29 @@ import Task
 import MainActions exposing (..)
 import Messages
 import MessagesActions
+import Signal exposing (forwardTo)
 import Trigger
+
+
+mailbox : Signal.Mailbox Action
+mailbox =
+  Signal.mailbox NoOp
 
 
 type alias Model =
   { messagesModel : Messages.Model
+  , triggerModel : Trigger.Model
   }
 
 
 initialModel : Model
 initialModel =
-  { messagesModel = Messages.initialModel
-  }
+    { messagesModel = Messages.initialModel
+    , triggerModel =
+        Trigger.init
+          (forwardTo mailbox.address TriggerValue)
+          "Hello"
+    }
 
 
 init : ( Model, Effects Action )
@@ -36,9 +47,8 @@ view address model =
   div
     []
     [ Messages.view (Signal.forwardTo address MessagesAction) model.messagesModel
-    , Trigger.view (Signal.forwardTo address TriggerAction) ""
+    , Trigger.view (Signal.forwardTo address TriggerAction) model.triggerModel
     ]
-
 
 
 -- UPDATE
@@ -47,6 +57,9 @@ view address model =
 update : Action -> Model -> ( Model, Effects Action )
 update action model =
   case (Debug.log "action" action) of
+    NoOp ->
+      (model, Effects.none)
+
     MessagesAction subAction ->
       let
         ( updated, fx ) =
@@ -56,29 +69,26 @@ update action model =
 
     TriggerAction subAction ->
       let
-        ( updated, subFx, mainFx ) =
-          Trigger.update subAction ""
-
-        fx =
-          Effects.batch [ (Effects.map TriggerAction subFx), mainFx ]
+        ( updated, fx ) =
+          Trigger.update subAction model.triggerModel
       in
-        ( model, fx )
+        ( { model | triggerModel = updated }, Effects.map TriggerAction fx )
 
-    ShowMessage message ->
+    TriggerValue message ->
       let
-        fx =
-          Task.succeed (MessagesActions.ShowMessage message)
-            |> Effects.task
-            |> Effects.map MessagesAction
+        ( updated, fx ) =
+          Messages.update (MessagesActions.ShowMessage message) model.messagesModel
       in
-        ( model, fx )
+        ( { model | messagesModel = updated }, Effects.map MessagesAction fx )
 
 
 app : StartApp.App Model
 app =
   StartApp.start
     { init = init
-    , inputs = []
+    , inputs =
+      [ mailbox.signal
+      ]
     , update = update
     , view = view
     }
