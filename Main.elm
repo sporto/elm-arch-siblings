@@ -28,7 +28,7 @@ initialModel =
   { messagesModel = Messages.initialModel
   , triggerModel =
       Trigger.initialModel
-        (forwardTo messageMailbox.address ShowMessage)
+        (forwardTo messageMailbox.address MessagesAction)
   }
 
 
@@ -73,14 +73,6 @@ update action model =
           Trigger.update subAction model.triggerModel
       in
         ( { model | triggerModel = updated }, Effects.map TriggerAction fx )
-
-    ShowMessage message ->
-      let
-        ( updated, fx ) =
-          Messages.update (MessagesActions.ShowMessage message) model.messagesModel
-      in
-        ( { model | messagesModel = updated }, Effects.map MessagesAction fx )
-
 
 app : StartApp.App Model
 app =

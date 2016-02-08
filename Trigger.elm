@@ -4,14 +4,15 @@ import Html exposing (..)
 import Html.Events exposing (onClick)
 import Effects exposing (Effects, Never)
 import TriggerActions exposing (..)
+import MessagesActions
 
 
 type alias Model =
-  { messageAddress : Signal.Address String
+  { messageAddress : Signal.Address MessagesActions.Action
   }
 
 
-initialModel : Signal.Address String -> Model
+initialModel : Signal.Address MessagesActions.Action -> Model
 initialModel messageAddress =
   { messageAddress = messageAddress
   }
@@ -41,7 +42,7 @@ update action model =
     ShowMessage msg ->
       let
         fx =
-          Signal.send model.messageAddress msg
+          Signal.send model.messageAddress (MessagesActions.ShowMessage msg)
             |> Effects.task
             |> Effects.map ShowMessageDone
       in
